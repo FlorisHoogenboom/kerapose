@@ -5,7 +5,8 @@ test_requires = [
 ]
 
 dev_requires = [
-    'flake8==3.7.8'
+    'flake8==3.7.8',
+    'flake8-quotes>=2.1.0'
 ] + test_requires
 
 setup(
