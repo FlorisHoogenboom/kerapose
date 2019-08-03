@@ -11,7 +11,7 @@ dev_requires = [
 setup(
     name='openpose-cycling',
     version='0.1.0',
-    packages=['keras_han'],
+    packages=['openpose_cycling'],
     url='https://github.com/maxboiten/openpose-cycling',
     license='MIT',
     author='Floris Hoogenboom & Max Boiten',
