@@ -4,13 +4,14 @@ import os.path
 import matplotlib.pyplot as plt
 
 
-class PoseImage:
+class PoseImage(object):
     """ Image with Pose annotations, supplies methods for preparation """
 
     __slots__ = (
         "imgpath",
         "img",
         "annotations",
+        "predictions",
         "heatmap",
         "paf"
     )
@@ -95,7 +96,7 @@ class PoseImage:
         ax.imshow(self.img[:, :, colour_recode])
 
         # Overlay heatmap
-        ax.imshow(self.heatmap, alpha=alpha)
+        ax.imshow(self.heatmap[:, :, joint], alpha=alpha)
 
         return fig, ax
 
