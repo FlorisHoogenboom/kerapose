@@ -19,7 +19,9 @@ setup(
     author_email='floris@digitaldreamworks.nl',
     description='An application of pose estimation to cycling images.',
     install_requires=[
-        'keras>=2.2.4'
+        'keras>=2.2.4',
+        'opencv-python>=3.0',
+        'numpy>=1.15.1'
     ],
     test_requires=test_requires,
     extras_require={

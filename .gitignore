@@ -130,3 +130,6 @@ dmypy.json
 # Misc
 data/
 output/
+
+# Vscode settings
+.vscode/
