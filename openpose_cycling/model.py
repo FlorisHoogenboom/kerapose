@@ -172,14 +172,12 @@ class PoseEstimator(object):
 
     def predict_from_image(self, images):
         """
-        Creates a PAF and Heatmap prediction from a single image or a batch of images
-        by applying the pose estimation network on multiple scales and averaging the
-        results.
+        Creates a PAF and Heatmap prediction from a batch of images by applying the pose
+        estimation network on multiple scales and averaging the results.
 
         Args:
-            images (3 or 4d - Numpy Array ): The image to predict on. This can be either
-                a single image (3d Array) or a batch of images (4d Array). The channels
-                should be ordered RGB.
+            images (4d - Numpy Array ): The images to predict on. Thous should be a batch
+                of images (4d Array). The channels should be ordered RGB.
 
         Returns:
             4d Numpy Array: The predicted PAF field with the before last dimension
@@ -187,19 +185,22 @@ class PoseEstimator(object):
             3d Numpy Array: The predicted Heatmap with the last dimension corresponding
                 to the joint that was searched for
         """
-        return_batch = images.ndim == 4
-
-        if not return_batch:
-            # If not a batch of images has been passed, add the batch dimension to the
-            # input because the model still expects this.
-            images = images[None, ...]
 
         # The model makes prediction on multiple sizes of the same image. The results
         # of those predictions need to be averaged into a single PAF and heatmap
         # prediction. We create two placeholders where we can add all predictions to and
         # later use these to average the results.
-        added_heatmaps = np.zeros(images.shape[0:3] + (c.NETWORK_N_OUTPUT_HM_BRANCH,))
-        added_pafs = np.zeros((images.shape[0:3] + (c.NETWORK_N_OUTPUT_PAF_BRANCH,)))
+        output_h, output_w = (
+            utils.get_new_dims_from_max(*images.shape[1:3], c.POSTPROCESS_INPUT_SIZE)
+        )
+
+        added_heatmaps = np.zeros(
+            (images.shape[0], output_w, output_h, c.NETWORK_N_OUTPUT_HM_BRANCH)
+        )
+        added_pafs = np.zeros(
+            (images.shape[0], output_w, output_h, c.NETWORK_N_OUTPUT_PAF_BRANCH)
+        )
+
 
         for max_size in c.PREDICT_STACK_SIZES:
             resized_images = utils.resize_batch(max_size, images)
@@ -209,8 +210,8 @@ class PoseEstimator(object):
                 self.model.predict(resized_images[..., [2, 1, 0]])
             )
 
-            heatmap_upsampled = utils.resize_batch(images.shape[1:3], heatmap)
-            paf_upsampled = utils.resize_batch(images.shape[1:3], paf)
+            heatmap_upsampled = utils.resize_batch((output_w, output_h), heatmap)
+            paf_upsampled = utils.resize_batch((output_w, output_h), paf)
 
             added_heatmaps = heatmap_upsampled + added_heatmaps
             added_pafs = paf_upsampled + added_pafs
@@ -224,7 +225,4 @@ class PoseEstimator(object):
             pafs_averaged.shape[0:-1] + (int(c.NETWORK_N_OUTPUT_PAF_BRANCH / 2), 2)
         )
 
-        if return_batch:
-            return pafs_averaged_resh, heatmaps_averaged
-        else:
-            return pafs_averaged_resh[0], heatmaps_averaged[0]
+        return pafs_averaged_resh, heatmaps_averaged

@@ -4,6 +4,21 @@ import cv2
 import numpy as np
 
 
+def get_new_dims_from_max(orig_w, orig_h, max_size):
+    """
+    Utility to get the new height and width when a maximum size for either dimension
+    is specified.
+    """
+    if orig_w > orig_h:
+        new_w = max_size
+        new_h = math.ceil((max_size / orig_w) * orig_h)
+    else:
+        new_w = math.ceil((max_size / orig_h) * orig_w)
+        new_h = max_size
+
+    return new_w, new_h
+
+
 def resize_batch(max_size, images):
     """
     Resize a batch of images to a specified maximum size.
@@ -22,12 +37,8 @@ def resize_batch(max_size, images):
 
     if type(max_size) == tuple:
         new_w, new_h = max_size
-    elif orig_w > orig_h:
-        new_w = max_size
-        new_h = math.ceil((max_size / orig_w) * orig_h)
     else:
-        new_w = math.ceil((max_size / orig_h) * orig_w)
-        new_h = max_size
+        new_w, new_h = get_new_dims_from_max(orig_w, orig_h, max_size)
 
     resized_images = np.zeros((images.shape[0], new_w, new_h, images.shape[3]))
 
