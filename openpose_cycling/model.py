@@ -225,8 +225,8 @@ class PoseEstimator(object):
                 RGB oriented image or a batch of RGB oriented images. The input should not
                 be greater than the maximum size specified in config.PREDICT_STACK_SIZES.
         Returns:
-            TODO:....
-
+            list: A nested list of joint coordinates, with the outer dimension
+                corresponding to the batch dimension of the input.
         """
         predict_batch = images.ndim == 4
 
