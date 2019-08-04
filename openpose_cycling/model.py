@@ -4,6 +4,7 @@ from keras.layers import Input, Lambda
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers.merge import Concatenate
+from scipy.ndimage import filters
 
 from . import utils
 from . import config as c
@@ -170,7 +171,84 @@ class PoseEstimator(object):
 
         return Model(img_input, [stage_paf, stage_hm])
 
+    def _predict_joint_anchors_from_heatmap(self, heatmap):
+        """
+        Makes suggestions for the joint locations using the heatmap as an input
+        Args:
+            heatmap (3d Numpy Array): The heatmap for a single image as returned by
+                the pose estimation network.
+
+        Returns:
+            list: A list of the same length as config.ELEMENTS containing the predicted
+                locations for each joint type
+        """
+        predictions = []
+
+        for part_id, name in enumerate(c.ELEMENTS):
+            map_ori = heatmap[:, :, part_id]
+            smoothed_heatmap = filters.gaussian_filter(map_ori, sigma=3)
+
+            map_left = np.zeros(smoothed_heatmap.shape)
+            map_left[1:, :] = smoothed_heatmap[:-1, :]
+
+            map_right = np.zeros(smoothed_heatmap.shape)
+            map_right[:-1, :] = smoothed_heatmap[1:, :]
+
+            map_up = np.zeros(smoothed_heatmap.shape)
+            map_up[:, 1:] = smoothed_heatmap[:, :-1]
+
+            map_down = np.zeros(smoothed_heatmap.shape)
+            map_down[:, :-1] = smoothed_heatmap[:, 1:]
+
+            # Determine local maxima in the heatmap fo find estimated locations
+            # for each joint
+            peaks = np.logical_and.reduce(
+                (smoothed_heatmap >= map_left,
+                 smoothed_heatmap >= map_right,
+                 smoothed_heatmap >= map_up,
+                 smoothed_heatmap >= map_down,
+                 smoothed_heatmap > c.JOINT_CONFIDENCE_THRESHOLD)
+            )
+
+            peak_coordinates = np.vstack(np.nonzero(peaks))[[1, 0]]
+            predictions.append(peak_coordinates)
+
+        return predictions
+
     def predict_from_image(self, images):
+        """
+        Creates a prediction for the joints per person for a single image or a batch of
+        images.
+
+        Args:
+            images (3d or 4d Numpy Array): The images to predict on. This can be a single
+                RGB oriented image or a batch of RGB oriented images. The input should not
+                be greater than the maximum size specified in config.PREDICT_STACK_SIZES.
+        Returns:
+            TODO:....
+
+        """
+        predict_batch = images.ndim == 4
+
+        if not predict_batch:
+            images = images[None, ...]
+
+        orig_w, orig_h = images.shape[1:3]
+
+        paf, heatmap = self.predict_paf_and_heatmap(images)
+
+        predicted_joints = []
+        for i in range(images.shape[0]):
+            joint_anchors = self._predict_joint_anchors_from_heatmap(heatmap[i])
+            joint_anchors_orig_size = utils.rescale_joint_predictions(
+                joint_anchors, orig_w / heatmap.shape[1], orig_h / heatmap.shape[2]
+            )
+
+            predicted_joints.append(joint_anchors_orig_size)
+
+        return predicted_joints
+
+    def predict_paf_and_heatmap(self, images):
         """
         Creates a PAF and Heatmap prediction from a batch of images by applying the pose
         estimation network on multiple scales and averaging the results.
@@ -200,7 +278,6 @@ class PoseEstimator(object):
         added_pafs = np.zeros(
             images.shape[0:1] + (output_w, output_h) + (c.NETWORK_N_OUTPUT_PAF_BRANCH,)
         )
-
 
         for max_size in c.PREDICT_STACK_SIZES:
             resized_images = utils.resize_batch(max_size, images)

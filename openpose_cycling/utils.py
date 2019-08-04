@@ -4,6 +4,21 @@ import cv2
 import numpy as np
 
 
+def get_new_dims_from_max(orig_w, orig_h, max_size):
+    """
+    Utility to get the new height and width when a maximum size for either dimension
+    is specified.
+    """
+    if orig_w > orig_h:
+        new_w = max_size
+        new_h = math.ceil((max_size / orig_w) * orig_h)
+    else:
+        new_w = math.ceil((max_size / orig_h) * orig_w)
+        new_h = max_size
+
+    return new_w, new_h
+
+
 def resize_batch(max_size, images):
     """
     Resize a batch of images to a specified maximum size.
@@ -22,12 +37,8 @@ def resize_batch(max_size, images):
 
     if type(max_size) == tuple:
         new_w, new_h = max_size
-    elif orig_w > orig_h:
-        new_w = max_size
-        new_h = math.ceil((max_size / orig_w) * orig_h)
     else:
-        new_w = math.ceil((max_size / orig_h) * orig_w)
-        new_h = max_size
+        new_w, new_h = get_new_dims_from_max(orig_w, orig_h, max_size)
 
     resized_images = np.zeros((images.shape[0], new_w, new_h, images.shape[3]))
 
@@ -35,3 +46,26 @@ def resize_batch(max_size, images):
         resized_images[i] = cv2.resize(images[i], (new_h, new_w))
 
     return resized_images
+
+
+def rescale_joint_predictions(joint_predictions, w, h):
+    """
+    This function rescales the joint predictions to the size of the original input image.
+    This is a convenience function for plotting
+    Args:
+        joint_predictions (list): Predictions per joint location
+        w (float): The desired output width
+        h (float): The desired output height
+
+    Returns:
+        list: A list of joint predictions (i.e. coordinates) that match the desired
+            height and width.
+    """
+    rescaled_predictions = []
+
+    for orig_joint_coord in joint_predictions:
+        rescaled_predictions.append(
+            [[h], [w]] * orig_joint_coord
+        )
+
+    return rescaled_predictions

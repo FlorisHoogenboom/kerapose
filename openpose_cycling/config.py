@@ -1,6 +1,7 @@
+# We use None to indicate the layers of the heatmap.
 ELEMENTS = ["nose", "neck", "Rsho", "Relb", "Rwri", "Lsho", "Lelb",
             "Lwri", "Rhip", "Rkne", "Rank", "Lhip", "Lkne", "Lank",
-            "Leye", "Reye", "Lear", "Rear", "pt19"]
+            "Leye", "Reye", "Lear", "Rear", None]
 
 # Map id to element name
 ELEMENTS_MAP = dict(enumerate(ELEMENTS))
@@ -18,4 +19,3 @@ NETWORK_N_OUTPUT_PAF_BRANCH = 38
 
 PREDICT_STACK_SIZES = [184, 276, 368]
 POSTPROCESS_INPUT_SIZE = 368
-
