@@ -279,7 +279,6 @@ class PoseEstimator(object):
             (images.shape[0], output_w, output_h, c.NETWORK_N_OUTPUT_PAF_BRANCH)
         )
 
-
         for max_size in c.PREDICT_STACK_SIZES:
             resized_images = utils.resize_batch(max_size, images)
 
