@@ -46,3 +46,26 @@ def resize_batch(max_size, images):
         resized_images[i] = cv2.resize(images[i], (new_h, new_w))
 
     return resized_images
+
+
+def rescale_joint_predictions(joint_predictions, w, h):
+    """
+    This function rescales the joint predictions to the size of the original input image.
+    This is a convenience function for plotting
+    Args:
+        joint_predictions (list): Predictions per joint location
+        w (float): The desired output width
+        h (float): The desired output height
+
+    Returns:
+        list: A list of joint predictions (i.e. coordinates) that match the desired
+            height and width.
+    """
+    rescaled_predictions = []
+
+    for orig_joint_coord in joint_predictions:
+        rescaled_predictions.append(
+            [[h], [w]] * orig_joint_coord
+        )
+
+    return rescaled_predictions

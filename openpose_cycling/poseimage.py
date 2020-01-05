@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os.path
 import matplotlib.pyplot as plt
-from scipy.ndimage.filters import gaussian_filter
+
 
 from . import config as c
 
@@ -202,36 +202,3 @@ class PoseImage(object):
 
     def plot_pose(self, connected=False):
         pass
-
-    def _calculate_joint_coordinates(self):
-        self.predictions = {}
-
-        for part, name in c.ELEMENTS_MAP.items():
-            if name == "pt19":  # Ignore background
-                continue
-
-            map_ori = self.heatmap[:, :, part]
-            smoothed_heatmap = gaussian_filter(map_ori, sigma=3)
-
-            map_left = np.zeros(smoothed_heatmap.shape)
-            map_left[1:, :] = smoothed_heatmap[:-1, :]
-
-            map_right = np.zeros(smoothed_heatmap.shape)
-            map_right[:-1, :] = smoothed_heatmap[1:, :]
-
-            map_up = np.zeros(smoothed_heatmap.shape)
-            map_up[:, 1:] = smoothed_heatmap[:, :-1]
-
-            map_down = np.zeros(smoothed_heatmap.shape)
-            map_down[:, :-1] = smoothed_heatmap[:, 1:]
-
-            peaks = np.logical_and.reduce(
-                (smoothed_heatmap >= map_left,
-                 smoothed_heatmap >= map_right,
-                 smoothed_heatmap >= map_up,
-                 smoothed_heatmap >= map_down,
-                 smoothed_heatmap > c.JOINT_CONFIDENCE_THRESHOLD)
-            )
-
-            peak_coordinates = np.vstack(np.nonzero(peaks))[[1, 0]]
-            self.predictions[part] = peak_coordinates
