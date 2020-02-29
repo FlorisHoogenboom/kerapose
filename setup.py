@@ -21,8 +21,7 @@ setup(
     install_requires=[
         'keras>=2.2.4',
         'opencv-python>=3.0',
-        'numpy>=1.15.1',
-        'skvideo>=1.1.10'
+        'numpy>=1.15.1'
     ],
     test_requires=test_requires,
     extras_require={

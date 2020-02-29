@@ -40,10 +40,10 @@ def resize_batch(max_size, images):
     else:
         new_w, new_h = get_new_dims_from_max(orig_w, orig_h, max_size)
 
-    resized_images = np.zeros((images.shape[0], new_w, new_h, images.shape[3]))
+    resized_images = np.zeros((images.shape[0], new_h, new_w, images.shape[3]))
 
     for i in range(images.shape[0]):
-        resized_images[i] = cv2.resize(images[i], (new_h, new_w))
+        resized_images[i] = cv2.resize(images[i], (new_w, new_h))
 
     return resized_images
 

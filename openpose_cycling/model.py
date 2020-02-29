@@ -167,7 +167,7 @@ class PoseEstimator(object):
                 next_stage_input, c.NETWORK_N_OUTPUT_HM_BRANCH, stage_nr, 2
             )
 
-            next_stage_input = Concatenate()([stage1_paf, stage1_hm, vgg_features])
+            next_stage_input = Concatenate()([stage_paf, stage_hm, vgg_features])
 
         return Model(img_input, [stage_paf, stage_hm])
 
@@ -273,10 +273,10 @@ class PoseEstimator(object):
         )
 
         added_heatmaps = np.zeros(
-            (images.shape[0], output_w, output_h, c.NETWORK_N_OUTPUT_HM_BRANCH)
+            (images.shape[0], output_h, output_w, c.NETWORK_N_OUTPUT_HM_BRANCH)
         )
         added_pafs = np.zeros(
-            (images.shape[0], output_w, output_h, c.NETWORK_N_OUTPUT_PAF_BRANCH)
+            (images.shape[0], output_h, output_w, c.NETWORK_N_OUTPUT_PAF_BRANCH)
         )
 
         for max_size in c.PREDICT_STACK_SIZES:
