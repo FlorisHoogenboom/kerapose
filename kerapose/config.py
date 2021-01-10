@@ -39,26 +39,6 @@ LINKS = [(1, 8),  (8, 9),
         (2, 16) ]
 
 
-{0: 'nose',
- 1: 'neck',
- 2: 'Rsho',
- 3: 'Relb',
- 4: 'Rwri',
- 5: 'Lsho',
- 6: 'Lelb',
- 7: 'Lwri',
- 8: 'Rhip',
- 9: 'Rkne',
- 10: 'Rank',
- 11: 'Lhip',
- 12: 'Lkne',
- 13: 'Lank',
- 14: 'Leye',
- 15: 'Reye',
- 16: 'Lear',
- 17: 'Rear',
- 18: None}
-
 # Confidence threshold for determination whether maximum on heat map constitutes a joint
 JOINT_CONFIDENCE_THRESHOLD = .1
 

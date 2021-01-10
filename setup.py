@@ -10,14 +10,14 @@ dev_requires = [
 ] + test_requires
 
 setup(
-    name='openpose-cycling',
+    name='kerapose',
     version='0.1.0',
-    packages=['openpose_cycling'],
+    packages=['kerapose'],
     url='https://github.com/maxboiten/openpose-cycling',
     license='MIT',
     author='Floris Hoogenboom & Max Boiten',
     author_email='floris@digitaldreamworks.nl',
-    description='An application of pose estimation to cycling images.',
+    description='Easy multiperson pose estimation using Keras.',
     install_requires=[
         'keras>=2.2.4',
         'opencv-python>=3.0',
